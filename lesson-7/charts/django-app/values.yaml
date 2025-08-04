@@ -1,14 +1,14 @@
 replicaCount: 2
 
 image:
-  repository: "nginx"
+  repository: "381492144666.dkr.ecr.eu-west-1.amazonaws.com/lesson-7-ecr"
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "amd64"
 
 service:
   type: LoadBalancer
   port: 80
-  targetPort: 80
+  targetPort: 8000
 
 autoscaling:
   enabled: true
