@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pyo
+.Python
+env/
+venv/
+ENV/
+.venv/
+*.env
+*.egg
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+
+# Django
+*.log
+staticfiles/
+static/
+media/
+
+# Database
+*.sqlite3
+*.db
+
+# Docker
+*.pid
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# MacOS
+.DS_Store
+
+# System
+Thumbs.db
+
+# Migrations (опционально, если хочешь их игнорировать на старте)
+# **/migrations/
+# !**/migrations/__init__.py
+
+# Docker volumes
+postgres_data/
+
+# dotenv
+.env
+
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/terraform.tfvars
+**/terraform.tfvars.json
+**/*.tfplan
+**/*.tfstate
+**/override.tf
+**/override.tf.json
+**/*_override.tf
+**/*_override.tf.json
+**/terraform.tfstate.d/
+**/.terraformrc
+**/terraform.rc
+
+# AWS
+**/.aws/

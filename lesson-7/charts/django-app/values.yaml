@@ -1,0 +1,36 @@
+replicaCount: 2
+
+image:
+  repository: "381492144666.dkr.ecr.eu-west-1.amazonaws.com/lesson-7-ecr"
+  pullPolicy: IfNotPresent
+  tag: "amd64"
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8000
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+env:
+  SECRET_KEY: "django-insecure-p_%rehih6bqa6*1td@b^j6hw8&@i8xw850o2z=7&j*ssi+b)&f"
+  DEBUG: "True"
+  ALLOWED_HOSTS: "*"
+  DB_ENGINE: "django.db.backends.postgresql"
+  DB_NAME: "mydb"
+  DB_USER: "myuser"
+  DB_PASSWORD: "mypassword"
+  DB_HOST: "db"
+  DB_PORT: "5432"
