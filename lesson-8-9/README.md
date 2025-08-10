@@ -290,29 +290,29 @@ lesson-8-9/
             └── hpa.yaml
 ```
 
-## Критерії прийняття завдання (100 балів)
+## Критерії 
 
-- ✅ **Встановлення Jenkins + Terraform + Helm (20 балів)**
+- ✅ **Встановлення Jenkins + Terraform + Helm **
   - Jenkins встановлений через Terraform модуль
   - Використовується Helm для deployment
   - Налаштовані всі необхідні plugins та credentials
 
-- ✅ **Робочий Jenkins pipeline (30 балів)**
+- ✅ **Робочий Jenkins pipeline**
   - Автоматична збірка Docker образу з Kaniko
   - Публікація в ECR з унікальними тегами
   - Автоматичне оновлення values.yaml у Git repository
 
-- ✅ **Встановлення Argo CD + Terraform + Helm (20 балів)**
+- ✅ **Встановлення Argo CD + Terraform + Helm**
   - Argo CD встановлений через Terraform модуль
   - Використовується Helm для deployment
   - Налаштований LoadBalancer для доступу
 
-- ✅ **Argo application з повною синхронізацією (20 балів)**
+- ✅ **Argo application з повною синхронізацією**
   - Application налаштований для моніторингу helm charts
   - Автоматична синхронізація при зміні Git repository
   - Self-healing та pruning увімкнені
 
-- ✅ **README.md з описом та схемою (10 балів)**
+- ✅ **README.md з описом та схемою **
   - Повний опис архітектури та workflow
   - Команди для розгортання та управління
   - Діаграма CI/CD процесу
