@@ -2,7 +2,7 @@
 Це репозиторій для навчального проєкту в межах курсу "DevOps CI/CD".  
 
 ## Мета  
-Навчитися основам роботи з DevOps інструментами та практиками розгортання застосунків через повний цикл розробки та доставки програмного забезпечення.
+Навчитися основам роботи з DevOps інструментами та практиками розгортання застосунків.
 
 ## Структура проєкту
 
@@ -10,80 +10,150 @@
 - **lesson-4/**: Django застосунок з Docker та docker-compose
 - **lesson-5/**: Terraform інфраструктура на AWS (VPC, ECR, S3 backend)
 - **lesson-7/**: Kubernetes EKS з Helm для розгортання Django застосунку
-- **lesson-8-9/**: Повний CI/CD pipeline з Jenkins, Terraform, ECR, Helm та Argo CD
+- **lesson-db-module/**: Універсальний Terraform модуль для баз даних (RDS та Aurora)
 
-## Урок 8-9 - Повний CI/CD з Jenkins + Terraform + ECR + Helm + Argo CD 🚀
+## Lesson DB Module - Універсальний модуль баз даних 🗄️
 
 ### Опис проєкту
-Цей урок демонструє реалізацію повного CI/CD pipeline'у, який об'єднує Jenkins, Terraform, Amazon ECR, Helm та Argo CD для автоматичного розгортання Django-застосунку без ручного втручання.
+Універсальний Terraform модуль для розгортання баз даних на AWS, який підтримує як традиційні RDS інстанси, так і Aurora кластери.
 
-### Архітектура CI/CD
+### Ключові можливості
+- **Подвійна підтримка**: RDS інстанси та Aurora кластери через прапор `use_aurora`
+- **Багато двигунів**: PostgreSQL та MySQL для RDS і Aurora
+- **Автоматичне створення**: DB Subnet Group, Security Group, Parameter Groups
+- **Production-ready**: шифрування, бекапи, моніторинг, високої доступності
 
+### Приклади використання модуля
+
+**PostgreSQL RDS інстанс:**
+```hcl
+module "postgres_rds" {
+  source = "./modules/rds"
+  
+  use_aurora     = false
+  engine         = "postgres"
+  engine_version = "14.18"
+  instance_class = "db.t3.micro"
+  
+  db_name  = "myapp"
+  username = "dbadmin"
+  password = "MySecretPassword123!"
+  
+  vpc_id                        = module.vpc.vpc_id
+  subnet_ids                   = module.vpc.private_subnet_ids
+  allowed_security_group_ids   = [aws_security_group.app.id]
+  
+  environment   = "dev"
+  project_name  = "lesson-db-module"
+}
 ```
-[Django App Code] 
-    ↓ (git push)
-[Jenkins Pipeline]
-    ↓ (build & push)
-[Amazon ECR]
-    ↓ (update values.yaml)
-[Git Repository]
-    ↓ (git push)
-[Argo CD]
-    ↓ (sync)
-[EKS Cluster] → [Django App]
+
+**Aurora MySQL кластер:**
+```hcl
+module "mysql_aurora" {
+  source = "./modules/rds"
+  
+  use_aurora            = true
+  engine               = "aurora-mysql"
+  engine_version       = "8.0.mysql_aurora.3.02.0"
+  aurora_instance_class = "db.r5.large"
+  aurora_cluster_size   = 2
+  
+  db_name  = "webapp"
+  username = "admin"
+  password = "AuroraSecretPass123!"
+  
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnet_ids
+  
+  environment  = "production"
+  project_name = "webapp"
+}
 ```
 
-### Компоненти Infrastructure (Terraform):
-- **EKS Cluster**: Kubernetes кластер версії 1.28 з 2 worker nodes
-- **VPC**: Virtual Private Cloud з публічними та приватними підмережами
-- **ECR**: Elastic Container Registry для зберігання Docker образів
-- **Jenkins**: CI/CD сервер, встановлений через Helm
-- **Argo CD**: GitOps deployment tool, встановлений через Helm
+### Опис змінних
 
-### CI/CD Pipeline:
-1. **Jenkins Pipeline**: Збирає Docker образ, пушить до ECR, оновлює Helm chart
-2. **Argo CD**: Автоматично синхронізує зміни з Git репозиторію до Kubernetes
+**Обов'язкові змінні:**
+- `password` - пароль для бази даних (sensitive)
+- `vpc_id` - ID VPC для розгортання
+- `subnet_ids` - список ID підмереж для DB subnet group
+
+**Основні змінні конфігурації:**
+- `use_aurora` - використовувати Aurora (true) чи RDS (false), за замовчуванням: `false`
+- `engine` - двигун БД (postgres, mysql, aurora-mysql, aurora-postgresql), за замовчуванням: `postgres`
+- `engine_version` - версія двигуна БД, за замовчуванням: `14.18`
+- `instance_class` - клас інстансу для RDS, за замовчуванням: `db.t3.micro`
+- `aurora_instance_class` - клас інстансу для Aurora, за замовчуванням: `db.r5.large`
+- `db_name` - ім'я бази даних, за замовчуванням: `myapp`
+- `username` - користувач БД, за замовчуванням: `dbadmin`
+
+**Змінні продуктивності та безпеки:**
+- `multi_az` - Multi-AZ розгортання, за замовчуванням: `false`
+- `storage_encrypted` - шифрування зберігання, за замовчуванням: `true`
+- `backup_retention_period` - період збереження бекапів (дні), за замовчуванням: `7`
+- `deletion_protection` - захист від видалення, за замовчуванням: `false`
+- `performance_insights_enabled` - увімкнути Performance Insights, за замовчуванням: `false`
+
+### Як змінити тип БД, engine, клас інстансу
+
+**Зміна типу БД (RDS ↔ Aurora):**
+```hcl
+# RDS інстанс
+use_aurora = false
+instance_class = "db.t3.micro"
+
+# Aurora кластер
+use_aurora = true
+aurora_instance_class = "db.r5.large"
+aurora_cluster_size = 2
+```
+
+**Зміна engine БД:**
+```hcl
+# PostgreSQL
+engine = "postgres"
+engine_version = "14.18"
+
+# MySQL RDS
+engine = "mysql" 
+engine_version = "8.0.35"
+
+# Aurora MySQL
+engine = "aurora-mysql"
+engine_version = "8.0.mysql_aurora.3.02.0"
+
+# Aurora PostgreSQL
+engine = "aurora-postgresql"
+engine_version = "14.7"
+```
+
+**Зміна класу інстансу:**
+```hcl
+# Для розробки
+instance_class = "db.t3.micro"           # RDS
+aurora_instance_class = "db.t4g.medium"  # Aurora
+
+# Для продакшена
+instance_class = "db.r5.large"           # RDS
+aurora_instance_class = "db.r5.xlarge"   # Aurora
+```
+
+**Налаштування продуктивності:**
+```hcl
+# Високі навантаження
+allocated_storage = 500
+max_allocated_storage = 1000
+storage_type = "gp3"
+multi_az = true
+performance_insights_enabled = true
+monitoring_interval = 60
+```
 
 ### Результати розгортання ✅
+- ✅ PostgreSQL RDS створено
+- ✅ Endpoint: `lesson-db-module-dev-db.cdg82o4wqs1y.eu-west-1.rds.amazonaws.com:5432`
+- ✅ Aurora PostgreSQL кластер успішно розгорнуто
 
-**Створені ресурси AWS:**
-- ✅ EKS Cluster: `lesson-8-9-eks-cluster`
-- ✅ ECR Repository: `lesson-8-9-ecr`
-- ✅ VPC з публічними та приватними підмережами
-- ✅ S3 bucket для Terraform state
-- ✅ DynamoDB таблиця для блокувань
-
-**Kubernetes ресурси:**
-- ✅ Jenkins: Namespace `jenkins` з LoadBalancer service
-- ✅ Argo CD: Namespace `argocd` з LoadBalancer service  
-- ✅ Django App: Deployment з автомасштабуванням
-
-**CI/CD Workflow:**
-- ✅ Автоматична збірка Docker образу з Kaniko
-- ✅ Публікація в ECR з унікальними тегами (`build-number-git-hash`)
-- ✅ Автоматичне оновлення Helm chart
-- ✅ GitOps розгортання через Argo CD
-
-### Команди для розгортання
-
-```bash
-# 1. Розгортання інфраструктури
-cd lesson-8-9
-terraform init
-terraform apply
-
-# 2. Налаштування kubectl
-aws eks update-kubeconfig --region eu-west-1 --name lesson-8-9-eks-cluster
-
-# 3. Отримання доступів
-terraform output jenkins_url
-terraform output jenkins_admin_password
-terraform output argocd_url
-terraform output argocd_admin_password
-
-# 4. Очищення ресурсів для уникнення затрат
-terraform destroy
-```
 
 ## Урок 7 - Kubernetes EKS з Helm 🚀
 
@@ -224,22 +294,28 @@ Bash скрипт для автоматичного встановлення і�
 
 - **Хмарна платформа**: Amazon Web Services (AWS)
 - **Інфраструктура як код**: Terraform
-- **Контейнеризація**: Docker, Kaniko
+- **Контейнеризація**: Docker
 - **Оркестрація**: Kubernetes (Amazon EKS)
 - **Управління пакетами**: Helm
-- **CI/CD**: Jenkins, Argo CD
-- **GitOps**: Argo CD з автоматичною синхронізацією
-- **Container Registry**: Amazon ECR
 - **Веб-фреймворк**: Django
 - **База даних**: PostgreSQL
 - **Веб-сервер**: Nginx, Gunicorn
 
-### Еволюція проєкту:
-- **Урок 3**: Інструменти розробки (Docker, Python, Django)
-- **Урок 4**: Контейнеризація застосунку (Django + Docker + docker-compose)
-- **Урок 5**: Infrastructure as Code (Terraform modules на AWS)
-- **Урок 7**: Kubernetes оркестрація (EKS + Helm + Django deployment)
-- **Урок 8-9**: Повний CI/CD automation (Jenkins + Argo CD + GitOps)
+## Критерії прийняття завдання ✅
+
+### Урок 7 - Результат виконання:
+1. ✅ **Кластер Kubernetes створений через Terraform і працює**
+2. ✅ **ECR створений і містить Django Docker-образ**
+3. ✅ **Deployment, Service і HPA створені через Helm**
+4. ✅ **ConfigMap створено та використовується застосунком**
+5. ✅ **Документація створена українською мовою**
+
+### Поточний стан інфраструктури:
+- **EKS кластер**: `lesson-7-eks-cluster` з 2 worker nodes
+- **ECR репозиторій**: Містить Django образи (ARM64 та AMD64)
+- **Django застосунок**: Доступний через LoadBalancer
+- **Автомасштабування**: Налаштовано HPA 2-6 подів
+- **Конфігурація**: 9 змінних оточення в ConfigMap
 
 ## Автор
 Проєкт виконаний в рамках курсу DevOps CI/CD

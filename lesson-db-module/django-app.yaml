@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: django-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/vvpcode/lesson-8-9-charts
+    targetRevision: HEAD
+    path: django-chart
+    helm:
+      values: |
+        image:
+          repository: 381492144666.dkr.ecr.eu-west-1.amazonaws.com/lesson-8-9-ecr
+          tag: latest
+        service:
+          type: LoadBalancer
+          port: 8000
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: django-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
