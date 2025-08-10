@@ -1,0 +1,56 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: jenkins-job-setup
+  namespace: jenkins
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: setup
+        image: curlimages/curl:latest
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          sleep 30
+          echo "Creating Jenkins pipeline job..."
+          
+          # Wait for Jenkins to be ready
+          until curl -f -s http://jenkins:8080/login; do
+            echo "Waiting for Jenkins..."
+            sleep 10
+          done
+          
+          # Create job via API
+          curl -X POST "http://admin:admin123@jenkins:8080/createItem?name=django-pipeline" \
+            -H "Content-Type: application/xml" \
+            --data-raw '<?xml version="1.0" encoding="UTF-8"?>
+          <flow-definition plugin="workflow-job">
+            <description>Django CI/CD Pipeline</description>
+            <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps">
+              <scm class="hudson.plugins.git.GitSCM" plugin="git">
+                <configVersion>2</configVersion>
+                <userRemoteConfigs>
+                  <hudson.plugins.git.UserRemoteConfig>
+                    <url>https://github.com/vvpcode/my-microservice-project.git</url>
+                  </hudson.plugins.git.UserRemoteConfig>
+                </userRemoteConfigs>
+                <branches>
+                  <hudson.plugins.git.BranchSpec>
+                    <name>*/lesson-8-9</name>
+                  </hudson.plugins.git.BranchSpec>
+                </branches>
+              </scm>
+              <scriptPath>Jenkinsfile</scriptPath>
+            </definition>
+            <triggers>
+              <hudson.triggers.SCMTrigger>
+                <spec>H/5 * * * *</spec>
+                <ignorePostCommitHooks>false</ignorePostCommitHooks>
+              </hudson.triggers.SCMTrigger>
+            </triggers>
+          </flow-definition>'
+          
+          echo "Jenkins job created successfully!"
