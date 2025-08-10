@@ -12,4 +12,3 @@ spec:
     protocol: TCP
   selector:
     app: {{ .Chart.Name }}
-EOF < /dev/null

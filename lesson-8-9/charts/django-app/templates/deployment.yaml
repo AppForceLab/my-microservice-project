@@ -22,4 +22,3 @@ spec:
         - containerPort: {{ .Values.service.targetPort }}
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
-EOF < /dev/null
