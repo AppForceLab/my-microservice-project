@@ -3,14 +3,116 @@
 
 ## Мета  
 Навчитися основам роботи з DevOps інструментами та практиками розгортання застосунків.
+Навчитися основам роботи з DevOps інструментами та практиками розгортання застосунків.
 
 ## Структура проєкту
 
-- **lesson-3/**: Bash скрипти для встановлення інструментів розробки
-- **lesson-4/**: Django застосунок з Docker та docker-compose
-- **lesson-5/**: Terraform інфраструктура на AWS (VPC, ECR, S3 backend)
-- **lesson-7/**: Kubernetes EKS з Helm для розгортання Django застосунку
+- **Final Project/**: Повний DevOps pipeline з всіма компонентами
 - **lesson-db-module/**: Універсальний Terraform модуль для баз даних (RDS та Aurora)
+- **lesson-8-9/**: Jenkins + Argo CD для CI/CD
+- **lesson-7/**: Kubernetes EKS з Helm для розгортання Django застосунку
+- **lesson-5/**: Terraform інфраструктура на AWS (VPC, ECR, S3 backend)
+- **lesson-4/**: Django застосунок з Docker та docker-compose
+- **lesson-3/**: Bash скрипти для встановлення інструментів розробки
+
+## 🏆 Final Project - Комплексний DevOps Pipeline
+
+### Архітектура фінального проєкту
+Повний production-ready DevOps pipeline з усіма компонентами:
+
+**Інфраструктура (Infrastructure as Code):**
+- **VPC**: Ізольована мережа з public/private підмережами
+- **EKS**: Kubernetes кластер для оркестрації контейнерів
+- **RDS**: PostgreSQL база даних з Multi-AZ
+- **ECR**: Docker registry для образів
+
+**CI/CD Pipeline:**
+- **Jenkins**: Автоматизація збирання та тестування
+- **Argo CD**: GitOps розгортання в Kubernetes
+- **Helm**: Управління Kubernetes застосунками
+
+**Моніторинг та Спостереження:**
+- **Prometheus**: Збір метрик з кластера та застосунків
+- **Grafana**: Візуалізація метрик та dashboards
+- **AlertManager**: Сповіщення про критичні події
+
+### Результати розгортання ✅
+- ✅ PostgreSQL RDS створено
+- ✅ Endpoint: `lesson-db-module-dev-db.cdg82o4wqs1y.eu-west-1.rds.amazonaws.com:5432`
+- ✅ Aurora PostgreSQL кластер успішно розгорнуто
+
+🏗️ **Створена інфраструктура:**
+- ✅ **EKS Cluster**: `final-project-eks-cluster` з 2 worker nodes
+- ✅ **VPC**: Ізольована мережа з 6 підмережами (3 public + 3 private)
+- ✅ **RDS PostgreSQL**: `final-project-production-db` (Multi-AZ) 
+- ✅ **ECR Repository**: `final-project-ecr` з Django образами
+
+🚀 **Розгорнуті сервіси:**
+- ✅ **Jenkins**: CI/CD pipeline (2/2 pods Running)
+- ✅ **Argo CD**: GitOps (5/5 pods Running, Healthy + Synced)
+- ✅ **Prometheus**: Metrics collection (2/2 pods Running)
+- ✅ **Grafana**: Dashboards (3/3 pods Running)
+- ✅ **Django App**: Production app (2/2 pods Running + HPA)
+
+💾 **Persistent Storage:**
+- ✅ **Jenkins PVC**: 20Gi (Bound)
+- ✅ **Prometheus PVC**: 20Gi (Bound)  
+- ✅ **Grafana PVC**: 5Gi (Bound)
+- ✅ **Alertmanager PVC**: 5Gi (Bound)
+
+**🌐 Доступ до сервісів через AWS URLs:**
+
+**Jenkins CI/CD:**
+- **URL**: http://a016f3d06f8504012b4f4b9a13ebd33a-1981017016.eu-west-1.elb.amazonaws.com:8080
+- **Login**: admin / admin123
+- **Status**: ✅ HTTP 200 (Working)
+
+**Argo CD GitOps:**
+- **URL**: https://a05fc9b53019d4e97b6470adb9ddee14-331120931.eu-west-1.elb.amazonaws.com
+- **Login**: admin / WRkqXBQRLXVTq8So
+- **Status**: ✅ HTTP 200 (Healthy + Synced)
+
+**Grafana Monitoring:**
+- **URL**: http://af6503eaf801a434b97d413d1df0241a-1422711606.eu-west-1.elb.amazonaws.com
+- **Login**: admin / admin123
+- **Status**: ✅ HTTP 302 (Ready)
+
+**Prometheus Metrics:**
+- **URL**: http://add504804b7d246a0bd5c576b6b7dd6c-1293644691.eu-west-1.elb.amazonaws.com:9090
+- **Status**: ✅ HTTP 302 (Ready)
+
+**Django Application:**
+- **URL**: http://a40be67dd32e14e7bbd1588af4764378-416909794.eu-west-1.elb.amazonaws.com
+- **Status**: ✅ HTTP 200 (Running with 2 replicas + HPA)
+
+### 🎯 Фінальний результат
+**Повноцінний production-ready DevOps pipeline з:**
+- **Infrastructure as Code** (Terraform)
+- **Container Registry** (ECR)
+- **CI/CD Pipeline** (Jenkins)
+- **GitOps Deployment** (Argo CD - Healthy & Synced)
+- **Monitoring Stack** (Prometheus + Grafana)
+- **Auto-scaling Application** (Django + HPA)
+- **Production Database** (RDS PostgreSQL)
+- **High Availability** (Multi-AZ, LoadBalancers)
+
+
+```bash
+# 1. Ініціалізація
+terraform init
+
+# 2. Розгортання (20-25 хвилин)
+terraform apply
+
+# 3. Налаштування kubectl
+aws eks update-kubeconfig --region eu-west-1 --name final-project-eks-cluster
+
+# 4. Перевірка стану
+kubectl get nodes
+kubectl get all --all-namespaces
+```
+
+**📖 Детальна інструкція**: Див. [DEPLOYMENT.md](DEPLOYMENT.md)
 
 ## Lesson DB Module - Універсальний модуль баз даних 🗄️
 
@@ -294,28 +396,16 @@ Bash скрипт для автоматичного встановлення і�
 
 - **Хмарна платформа**: Amazon Web Services (AWS)
 - **Інфраструктура як код**: Terraform
-- **Контейнеризація**: Docker
+- **Контейнеризація**: Docker, Kaniko
 - **Оркестрація**: Kubernetes (Amazon EKS)
 - **Управління пакетами**: Helm
+- **CI/CD**: Jenkins, Argo CD
+- **GitOps**: Argo CD з автоматичною синхронізацією
+- **Container Registry**: Amazon ECR
 - **Веб-фреймворк**: Django
 - **База даних**: PostgreSQL
 - **Веб-сервер**: Nginx, Gunicorn
 
-## Критерії прийняття завдання ✅
-
-### Урок 7 - Результат виконання:
-1. ✅ **Кластер Kubernetes створений через Terraform і працює**
-2. ✅ **ECR створений і містить Django Docker-образ**
-3. ✅ **Deployment, Service і HPA створені через Helm**
-4. ✅ **ConfigMap створено та використовується застосунком**
-5. ✅ **Документація створена українською мовою**
-
-### Поточний стан інфраструктури:
-- **EKS кластер**: `lesson-7-eks-cluster` з 2 worker nodes
-- **ECR репозиторій**: Містить Django образи (ARM64 та AMD64)
-- **Django застосунок**: Доступний через LoadBalancer
-- **Автомасштабування**: Налаштовано HPA 2-6 подів
-- **Конфігурація**: 9 змінних оточення в ConfigMap
 
 ## Автор
 Проєкт виконаний в рамках курсу DevOps CI/CD
